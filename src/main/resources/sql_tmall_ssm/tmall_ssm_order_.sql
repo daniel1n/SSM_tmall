@@ -1,0 +1,64 @@
+-- MySQL dump 10.13  Distrib 5.7.17, for Win64 (x86_64)
+--
+-- Host: localhost    Database: tmall_ssm
+-- ------------------------------------------------------
+-- Server version	5.7.21-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `order_`
+--
+
+DROP TABLE IF EXISTS `order_`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `order_` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `orderCode` varchar(255) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `post` varchar(255) DEFAULT NULL,
+  `receiver` varchar(255) DEFAULT NULL,
+  `mobile` varchar(255) DEFAULT NULL,
+  `userMessage` varchar(255) DEFAULT NULL,
+  `createDate` datetime DEFAULT NULL,
+  `payDate` datetime DEFAULT NULL,
+  `deliveryDate` datetime DEFAULT NULL,
+  `confirmDate` datetime DEFAULT NULL,
+  `uid` int(11) DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_order_user` (`uid`),
+  CONSTRAINT `fk_order_user` FOREIGN KEY (`uid`) REFERENCES `user` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `order_`
+--
+
+LOCK TABLES `order_` WRITE;
+/*!40000 ALTER TABLE `order_` DISABLE KEYS */;
+INSERT INTO `order_` VALUES (1,'202005222003350396918','','','','','','2020-05-22 20:03:35',NULL,NULL,NULL,1,'waitPay'),(2,'202005222004376202770','珠江新城','516300','qqq','13249308836','','2020-05-22 20:04:37',NULL,NULL,NULL,1,'delete'),(3,'202005222005313625859','','','','','','2020-05-22 20:05:31','2020-05-22 20:05:36',NULL,NULL,1,'waitDelivery'),(4,'202005222007476876415','广东省广州市天河区车陂街道','516300','qqq','13249308836','','2020-05-22 20:07:47','2020-05-22 20:07:48','2020-05-22 20:24:22','2020-05-22 20:40:13',1,'waitReview'),(5,'202005222023440486188','','','','','','2020-05-22 20:23:44',NULL,NULL,NULL,1,'waitPay'),(6,'202005222249166092354','体育西','516300','qqq','13249308836','','2020-05-22 22:49:16','2020-05-22 22:49:17','2020-05-22 23:14:43',NULL,1,'waitConfirm'),(7,'202005222303029237745','','','','','','2020-05-22 23:03:02','2020-05-22 23:03:13','2020-05-22 23:14:42',NULL,1,'waitConfirm'),(8,'202005222314030546631','','','','','','2020-05-22 23:14:03','2020-05-22 23:14:04','2020-05-22 23:14:39','2020-05-22 23:15:36',2,'finish');
+/*!40000 ALTER TABLE `order_` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2020-05-23 13:35:33
