@@ -105,4 +105,13 @@ public interface ProductService {
      * @return List of matching products with images and categories populated
      */
     List<Product> search(String keyword);
+
+    /**
+     * Get multiple products by their IDs in a single query.
+     * Optimized to avoid N+1 query problem when loading products for multiple items.
+     *
+     * @param ids List of product IDs to fetch
+     * @return List of products matching the given IDs
+     */
+    List<Product> listByIds(List<Integer> ids);
 }

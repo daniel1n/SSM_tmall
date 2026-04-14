@@ -13,6 +13,7 @@
 | 基础设施 | Druid → HikariCP | pom.xml |
 | 日志框架 | Log4j → Logback | pom.xml |
 | 开发工具 | 添加 DevTools 和 Actuator | pom.xml |
+| 性能优化 | N+1 查询问题修复 | ProductService, OrderItemServiceImpl |
 
 ---
 
@@ -296,9 +297,91 @@ return o1.getPromotePrice().compareTo(o2.getPromotePrice());
 
 ---
 
-## 6. 基础设施优化 - pom.xml
+## 6. N+1 查询问题修复
 
-### 5.1 数据库连接池： Druid → HikariCP
+### 问题
+
+`OrderItemServiceImpl.setProduct()` 在循环中逐个调用 `productService.get()`，导致 N+1 查询问题：
+
+```java
+// 优化前：N+1 查询
+private void setProduct(List<OrderItem> orderItems) {
+    for (OrderItem orderItem : orderItems) {
+        // 每个 OrderItem 都执行一次数据库查询！
+        Product product = productService.get(orderItem.getPid());
+        orderItem.setProduct(product);
+    }
+}
+```
+
+如果有 10 个 OrderItem，就会执行 10 次 SELECT 查询。
+
+### 解决方案
+
+**1. 添加批量查询方法到 ProductService**
+
+```java
+/**
+ * 批量查询产品，避免 N+1 问题
+ */
+List<Product> listByIds(List<Integer> ids);
+```
+
+**2. 实现批量查询**
+
+```java
+@Override
+public List<Product> listByIds(List<Integer> ids) {
+    if (ids == null || ids.isEmpty()) {
+        return new ArrayList<>();
+    }
+    ProductExample example = new ProductExample();
+    example.createCriteria().andIdIn(ids);
+    List<Product> products = productMapper.selectByExample(example);
+    setFirstProductImage(products);
+    setCategory(products);
+    return products;
+}
+```
+
+**3. 优化后的 setProduct**
+
+```java
+// 优化后：1+1 查询 (1次获取OrderItems + 1次批量获取Products)
+private void setProduct(List<OrderItem> orderItems) {
+    if (orderItems == null || orderItems.isEmpty()) {
+        return;
+    }
+    // 收集所有产品ID
+    List<Integer> pids = orderItems.stream()
+            .map(OrderItem::getPid)
+            .collect(Collectors.toList());
+
+    // 一次性查询所有产品
+    List<Product> products = productService.listByIds(pids);
+
+    // 创建 Map 便于关联
+    Map<Integer, Product> productMap = products.stream()
+            .collect(Collectors.toMap(Product::getId, p -> p));
+
+    // 关联产品到订单项
+    for (OrderItem orderItem : orderItems) {
+        orderItem.setProduct(productMap.get(orderItem.getPid()));
+    }
+}
+```
+
+### 效果
+
+- 10 个 OrderItem：10 次查询 → 2 次查询
+- 查询次数从 N+1 降为 2 (1 次查 OrderItems + 1 次批量查 Products)
+- 显著提升订单页面加载性能
+
+---
+
+## 7. 基础设施优化 - pom.xml
+
+### 7.1 数据库连接池： Druid → HikariCP
 
 **优化前**: Druid 连接池
 ```xml
@@ -319,7 +402,7 @@ return o1.getPromotePrice().compareTo(o2.getPromotePrice());
 - Spring Boot 默认选择，开箱即用
 - 配置更简洁
 
-### 5.2 日志框架：Log4j → Logback
+### 7.2 日志框架：Log4j → Logback
 
 **优化前**: 显式使用 Log4j
 ```xml
@@ -388,10 +471,6 @@ mvn clean compile
    - 引入 Redis 缓存热门商品和分类数据
    - 使用 Spring Cache 简化缓存逻辑
 
-3. **N+1 查询问题**
-   - `OrderItemServiceImpl.setProduct()` 在循环中调用 `productService.get()`
-   - 可考虑使用 MyBatis 批量查询或 JOIN
-
-4. **并发优化**
+3. **并发优化**
    - 购物车操作考虑使用乐观锁
    - 库存扣减使用数据库原子操作

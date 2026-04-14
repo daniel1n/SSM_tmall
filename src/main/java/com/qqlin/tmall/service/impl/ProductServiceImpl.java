@@ -157,4 +157,17 @@ public class ProductServiceImpl implements ProductService {
         setCategory(result);
         return result;
     }
+
+    @Override
+    public List<Product> listByIds(List<Integer> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return new java.util.ArrayList<>();
+        }
+        ProductExample example = new ProductExample();
+        example.createCriteria().andIdIn(ids);
+        List<Product> products = productMapper.selectByExample(example);
+        setFirstProductImage(products);
+        setCategory(products);
+        return products;
+    }
 }

@@ -52,6 +52,34 @@ public class OrderItemServiceImpl implements OrderItemService {
         result.setProduct(product);
     }
 
+    /**
+     * Batch set products for multiple order items using optimized query.
+     * Fixes N+1 query problem by fetching all products in a single database call.
+     *
+     * @param orderItems List of order items to populate with products
+     */
+    private void setProduct(List<OrderItem> orderItems) {
+        if (orderItems == null || orderItems.isEmpty()) {
+            return;
+        }
+        // Extract all product IDs
+        List<Integer> pids = orderItems.stream()
+                .map(OrderItem::getPid)
+                .collect(java.util.stream.Collectors.toList());
+
+        // Batch fetch all products in ONE query
+        List<Product> products = productService.listByIds(pids);
+
+        // Create a map for quick lookup: pid -> Product
+        java.util.Map<Integer, Product> productMap = products.stream()
+                .collect(java.util.stream.Collectors.toMap(Product::getId, p -> p));
+
+        // Associate products with order items
+        for (OrderItem orderItem : orderItems) {
+            orderItem.setProduct(productMap.get(orderItem.getPid()));
+        }
+    }
+
     @Override
     public List<OrderItem> list() {
         OrderItemExample example = new OrderItemExample();
@@ -85,12 +113,6 @@ public class OrderItemServiceImpl implements OrderItemService {
         order.setTotal(total);
         order.setTotalNumber(totalNumber);
         order.setOrderItems(orderItems);
-    }
-
-    private void setProduct(List<OrderItem> orderItems) {
-        for (OrderItem orderItem : orderItems) {
-            setProduct(orderItem);
-        }
     }
 
     @Override
