@@ -1,6 +1,6 @@
 # SSM_tmall 电商平台
 
-基于 SSM (Spring + SpringMVC + MyBatis) 架构的仿天猫商城系统。
+基于 Spring Boot 2.7.18 架构的仿天猫商城系统。
 
 ## 项目概况
 
@@ -9,41 +9,60 @@
 | GroupId | com.qqlin.tmall |
 | ArtifactId | tmall_ssm |
 | 版本 | 1.0-SNAPSHOT |
-| 打包方式 | war |
+| 打包方式 | jar (可执行) |
 | Java 版本 | 17 |
+| Spring Boot | 2.7.18 |
 
 ## 技术栈
 
-- **Spring** 5.2.6.RELEASE
-- **SpringMVC** 5.2.6.RELEASE
-- **MyBatis** 3.5.6 + MyBatis-Spring 1.2.3
-- **MySQL** 8.0.28 + MySQL Connector 8.x
-- **Druid** 1.18 (数据库连接池)
-- **PageHelper** 5.1.2-beta (分页插件)
-- **JSP** (视图层)
-- **Log4j** 1.2.16
+| 层级 | 技术 | 版本 |
+|------|------|------|
+| 核心框架 | Spring Boot | 2.7.18 (Spring 5.7) |
+| Web 框架 | Spring Boot Web | 内嵌 Tomcat |
+| ORM | MyBatis Spring Boot | 2.2.2 |
+| 分页 | PageHelper Spring Boot | 1.4.7 |
+| 数据库 | MySQL + Connector | 8.0.28 |
+| 连接池 | Druid Spring Boot | 1.2.18 |
+| 视图 | JSP (嵌入式 Tomcat) | - |
+| 日志 | Logback (Spring Boot 默认) | - |
 
 ## 项目结构
 
 ```
 SSM_tmall/
-├── pom.xml
+├── pom.xml                          # Maven 配置 (Spring Boot)
 ├── src/main/java/com/qqlin/tmall/
-│   ├── comparator/          # 商品排序比较器
-│   ├── controller/          # 控制器层
-│   ├── interceptor/         # 登录拦截器
-│   ├── mapper/              # MyBatis Mapper 接口
-│   ├── pojo/                # 实体类
-│   ├── service/            # 业务逻辑接口
-│   └── util/               # 工具类
+│   ├── Application.java              # Spring Boot 启动类
+│   ├── config/
+│   │   ├── MybatisConfig.java       # MyBatis 配置
+│   │   └── WebMvcConfig.java       # Spring MVC 配置
+│   ├── comparator/                  # 商品排序比较器
+│   ├── controller/                  # 控制器层
+│   ├── interceptor/                 # 登录拦截器
+│   ├── mapper/                      # MyBatis Mapper 接口
+│   ├── pojo/                        # 实体类
+│   ├── service/                     # 业务逻辑接口
+│   └── util/                        # 工具类
 ├── src/main/resources/
-│   ├── applicationContext.xml   # Spring 主配置
-│   ├── springMVC.xml            # Spring MVC 配置
-│   ├── jdbc.properties          # 数据库连接配置
-│   ├── log4j.properties        # 日志配置
-│   └── mapper/                  # MyBatis XML 映射文件
-└── src/main/webapp/WEB-INF/web.xml
+│   ├── application.yml               # Spring Boot 配置
+│   └── mapper/                      # MyBatis XML 映射文件
+└── src/main/webapp/
+    └── WEB-INF/jsp/                  # JSP 视图文件
 ```
+
+## 升级历史
+
+### JDK 8 → JDK 17 + Spring Boot 2.7.18
+
+| 项目 | 升级前 | 升级后 |
+|------|--------|--------|
+| Java | 8 | 17 |
+| Spring | 5.2.6 (传统 SSM) | 5.7 (Spring Boot 2.7.18) |
+| 项目架构 | XML 配置 | Java Config |
+| 服务器 | 外部 Tomcat | 内嵌 Tomcat |
+| 打包 | war | jar |
+
+**详细升级说明**: [UPGRADE.md](./UPGRADE.md)
 
 ## 数据模型
 
@@ -73,7 +92,7 @@ Order ──────────── OrderItem
 | Category | 分类 (name) |
 | Product | 商品 (name, subTitle, originalPrice, promotePrice, stock, createDate) |
 | ProductImage | 商品图片 (type: type_single/type_detail) |
-| Property | 属性 (名称，屬于分类) |
+| Property | 属性 (名称，属于分类) |
 | PropertyValue | 属性值 (关联商品和属性) |
 | Order | 订单 (orderCode, address, post, receiver, mobile, status) |
 | OrderItem | 订单项/购物车项 (number) |
@@ -154,36 +173,75 @@ waitPay (待支付) → waitDelivery (待发货) → waitConfirm (待确认) →
 - **LoginInterceptor**: 保护 `/fore*` 接口，允许游客访问首页、商品、搜索等
 - **OtherInterceptor**: 填充导航栏分类、购物车数量
 
-## 数据库配置
+## 配置文件
 
-编辑 `src/main/resources/jdbc.properties`:
+### application.yml
 
-```properties
-jdbc.driver=com.mysql.cj.jdbc.Driver
-jdbc.url=jdbc:mysql://localhost:3306/tmall_ssm?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
-jdbc.username=root
-jdbc.password=admin
+数据库和框架配置统一在 `src/main/resources/application.yml` 中管理：
+
+```yaml
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/tmall_ssm?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: root
+    password: admin
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+
+server:
+  port: 8080
 ```
 
 ## 构建与运行
 
+### 环境要求
+
+- JDK 17+
+- MySQL 8.0+
+- Maven 3.6+
+
+### 构建步骤
+
 1. 创建数据库 `tmall_ssm`
-2. 修改 `jdbc.properties` 中的数据库配置
-3. 使用 MyBatis Generator 生成 Mapper (或使用已有代码)
-4. 使用 Maven 构建:
+2. 使用 Maven 构建:
 
 ```bash
 mvn clean package
 ```
 
-5. 部署 war 包到 Tomcat
+### 运行方式
+
+**方式一: 直接运行 JAR**
+
+```bash
+java -jar target/tmall_ssm.jar
+```
+
+**方式二: 使用 Maven 插件**
+
+```bash
+mvn spring-boot:run
+```
+
+**方式三: 导入 IDE 运行**
+
+将项目导入 IDEA/Eclipse，运行 `Application.java` 的 main 方法
+
+### 访问地址
+
+- 前台: http://localhost:8080/forehome
+- 管理后台: http://localhost:8080/admin_category_list
 
 ## 依赖版本
 
-- Spring: 5.2.6.RELEASE
-- MyBatis: 3.5.6
-- MyBatis-Spring: 1.2.3
-- MySQL Connector: 8.0.28
-- Druid: 1.18
-- PageHelper: 5.1.2-beta
-- Servlet API: 4.0.1
+| 依赖 | 版本 |
+|------|------|
+| Spring Boot | 2.7.18 |
+| MyBatis Spring Boot | 2.2.2 |
+| PageHelper Spring Boot | 1.4.7 |
+| MySQL Connector | 8.0.28 |
+| Druid Spring Boot | 1.2.18 |
+| Commons Lang3 | 3.x |

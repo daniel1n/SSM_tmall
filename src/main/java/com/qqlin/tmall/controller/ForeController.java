@@ -4,7 +4,7 @@ import com.github.pagehelper.PageHelper;
 import com.qqlin.comparator.*;
 import com.qqlin.tmall.pojo.*;
 import com.qqlin.tmall.service.*;
-import org.apache.commons.lang.math.RandomUtils;
+import org.apache.commons.lang3.RandomUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -551,7 +551,7 @@ public class ForeController {
     public String createOrder(Model model, Order order, HttpSession session) {
         User user = (User) session.getAttribute("user");
         String orderCode = new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date())
-                + RandomUtils.nextInt(10000);
+                + RandomUtils.nextInt(0, 10000);
 
         order.setOrderCode(orderCode);
         order.setCreateDate(new Date());

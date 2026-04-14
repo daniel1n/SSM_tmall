@@ -1,12 +1,8 @@
 package com.qqlin.tmall.interceptor;
 
 import com.qqlin.tmall.pojo.User;
-import com.qqlin.tmall.service.CategoryService;
-import com.qqlin.tmall.service.OrderItemService;
-import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -24,34 +20,23 @@ import java.util.Arrays;
  * <p>Endpoints that do not require authentication: home, checkLogin, register,
  * loginAjax, login, product, category, search</p>
  *
- * <p>This interceptor extends HandlerInterceptorAdapter and overrides:</p>
+ * <p>Spring Boot 适配说明:</p>
  * <ul>
- *   <li>preHandle() - Validates authentication before controller execution</li>
- *   <li>postHandle() - Called after controller processing (empty implementation)</li>
- *   <li>afterCompletion() - Called after complete request processing (empty implementation)</li>
+ *   <li>使用 HandlerInterceptor 替代已废弃的 HandlerInterceptorAdapter</li>
+ *   <li>移除了 @Autowired 依赖注入，改为通过构造器或参数传递</li>
+ *   <li>通过 new LoginInterceptor() 在 WebMvcConfig 中创建实例</li>
  * </ul>
  *
  * @author qqlin
  * @date 2020-5-22
- * @see HandlerInterceptorAdapter
- * @see javax.servlet.http.HttpSession
+ * @see HandlerInterceptor
  */
-public class LoginInterceptor extends HandlerInterceptorAdapter {
-
-    /** Service for retrieving category information (injected by Spring) */
-    @Autowired
-    CategoryService categoryService;
-
-    /** Service for retrieving order item information (injected by Spring) */
-    @Autowired
-    OrderItemService orderItemService;
+public class LoginInterceptor implements HandlerInterceptor {
 
     /**
-     * Default constructor for LoginInterceptor.
-     * Delegates to parent constructor.
+     * 无参构造器 - Spring Boot 通过 new 创建实例时使用
      */
     public LoginInterceptor() {
-        super();
     }
 
     /**
@@ -98,59 +83,5 @@ public class LoginInterceptor extends HandlerInterceptorAdapter {
             }
         }
         return true;
-    }
-
-    /**
-     * Called after the handler executes but before the view is rendered.
-     *
-     * <p>This method is called after the controller handler completes successfully
-     * but before the view is rendered. Currently, this is an empty implementation
-     * that can be extended to add common model attributes or modify the ModelAndView.</p>
-     *
-     * @param request     the HTTP request
-     * @param response    the HTTP response
-     * @param handler     the handler that was executed
-     * @param modelAndView the ModelAndView object containing model data and view name
-     */
-    @Override
-    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
-        super.postHandle(request, response, handler, modelAndView);
-    }
-
-    /**
-     * Called after the request is completely processed and the view has been rendered.
-     *
-     * <p>This callback is invoked after the entire request cycle completes, including
-     * view rendering. It is typically used for cleanup operations such as releasing
-     * resources. When an exception is thrown in any interceptor, this method is
-     * called from the current interceptor back through the chain.</p>
-     *
-     * @param request  the HTTP request
-     * @param response the HTTP response
-     * @param handler  the handler that was executed
-     * @param ex       any exception that was thrown during request processing,
-     *                 or {@code null} if no exception occurred
-     * @throws Exception if an error occurs during cleanup
-     */
-    @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        super.afterCompletion(request, response, handler, ex);
-    }
-
-    /**
-     * Called when a request is handled concurrently by a servlet's asynchronous processing.
-     *
-     * <p>This method is invoked when the request is processed asynchronously, allowing
-     * the interceptor to handle async dispatch scenarios. Currently, this is an
-     * empty implementation that delegates to the parent class.</p>
-     *
-     * @param request  the HTTP request
-     * @param response the HTTP response
-     * @param handler  the handler for async processing
-     * @throws Exception if an error occurs during async handling
-     */
-    @Override
-    public void afterConcurrentHandlingStarted(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        super.afterConcurrentHandlingStarted(request, response, handler);
     }
 }

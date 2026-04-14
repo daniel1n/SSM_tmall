@@ -5,9 +5,8 @@ import com.qqlin.tmall.pojo.OrderItem;
 import com.qqlin.tmall.pojo.User;
 import com.qqlin.tmall.service.CategoryService;
 import com.qqlin.tmall.service.OrderItemService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -28,26 +27,35 @@ import java.util.List;
  *   <li>Cart total item number (cartTotalItemNumber) - Number of items in user's cart</li>
  * </ul>
  *
+ * <p>Spring Boot 适配说明:</p>
+ * <ul>
+ *   <li>使用 HandlerInterceptor 替代已废弃的 HandlerInterceptorAdapter</li>
+ *   <li>移除了 @Autowired 依赖注入</li>
+ *   <li>通过构造器接收服务实例</li>
+ *   <li>在 WebMvcConfig 中创建实例并注入依赖</li>
+ * </ul>
+ *
  * @author qqlin
  * @date 2020-5-22
- * @see HandlerInterceptorAdapter
+ * @see HandlerInterceptor
  */
-public class OtherInterceptor extends HandlerInterceptorAdapter {
+public class OtherInterceptor implements HandlerInterceptor {
 
-    /** Service for retrieving category information (injected by Spring) */
-    @Autowired
-    CategoryService categoryService;
+    /** 分类服务 - 用于获取分类列表 */
+    private final CategoryService categoryService;
 
-    /** Service for retrieving order item information (injected by Spring) */
-    @Autowired
-    OrderItemService orderItemService;
+    /** 订单项服务 - 用于获取购物车数量 */
+    private final OrderItemService orderItemService;
 
     /**
-     * Default constructor for OtherInterceptor.
-     * Delegates to parent constructor.
+     * 构造器 - 接收服务依赖注入
+     *
+     * @param categoryService  分类服务
+     * @param orderItemService 订单项服务
      */
-    public OtherInterceptor() {
-        super();
+    public OtherInterceptor(CategoryService categoryService, OrderItemService orderItemService) {
+        this.categoryService = categoryService;
+        this.orderItemService = orderItemService;
     }
 
     /**
@@ -85,8 +93,6 @@ public class OtherInterceptor extends HandlerInterceptorAdapter {
      */
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
-        super.postHandle(request, response, handler, modelAndView);
-
         // Retrieves the category list and stores it in session for the search bar dropdown
         List<Category> categories = categoryService.list();
         request.getSession().setAttribute("cs", categories);
@@ -107,39 +113,5 @@ public class OtherInterceptor extends HandlerInterceptorAdapter {
             }
         }
         request.getSession().setAttribute("cartTotalItemNumber", cartTotalItemNumber);
-    }
-
-    /**
-     * Called after the request is completely processed and the view has been rendered.
-     *
-     * <p>This callback is invoked after the entire request cycle completes.
-     * Currently, this is an empty implementation that delegates to the parent class.</p>
-     *
-     * @param request  the HTTP request
-     * @param response the HTTP response
-     * @param handler  the handler that was executed
-     * @param ex       any exception that was thrown during request processing,
-     *                 or {@code null} if no exception occurred
-     * @throws Exception if an error occurs during cleanup
-     */
-    @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        super.afterCompletion(request, response, handler, ex);
-    }
-
-    /**
-     * Called when a request is handled concurrently by a servlet's asynchronous processing.
-     *
-     * <p>This method is invoked when the request is processed asynchronously.
-     * Currently, this is an empty implementation that delegates to the parent class.</p>
-     *
-     * @param request  the HTTP request
-     * @param response the HTTP response
-     * @param handler  the handler for async processing
-     * @throws Exception if an error occurs during async handling
-     */
-    @Override
-    public void afterConcurrentHandlingStarted(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        super.afterConcurrentHandlingStarted(request, response, handler);
     }
 }
