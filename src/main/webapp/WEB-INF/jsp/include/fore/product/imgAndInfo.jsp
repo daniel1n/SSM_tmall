@@ -1,6 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
          pageEncoding="UTF-8" isELIgnored="false" %>
 
+<%-- 商品详情页：图片展示与商品信息组件 --%>
+<%-- 功能：商品图片画廊、价格信息展示、数量选择、加入购物车/立即购买 --%>
 <script>
 
     $(function () {
