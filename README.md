@@ -10,14 +10,14 @@
 | ArtifactId | tmall_ssm |
 | 版本 | 1.0-SNAPSHOT |
 | 打包方式 | war |
-| Java 版本 | 1.8 |
+| Java 版本 | 17 |
 
 ## 技术栈
 
 - **Spring** 5.2.6.RELEASE
 - **SpringMVC** 5.2.6.RELEASE
 - **MyBatis** 3.5.6 + MyBatis-Spring 1.2.3
-- **MySQL** 5.x
+- **MySQL** 8.0.28 + MySQL Connector 8.x
 - **Druid** 1.18 (数据库连接池)
 - **PageHelper** 5.1.2-beta (分页插件)
 - **JSP** (视图层)
@@ -159,8 +159,8 @@ waitPay (待支付) → waitDelivery (待发货) → waitConfirm (待确认) →
 编辑 `src/main/resources/jdbc.properties`:
 
 ```properties
-jdbc.driver=com.mysql.jdbc.Driver
-jdbc.url=jdbc:mysql://localhost:3306/tmall_ssm?useUnicode=true&characterEncoding=utf8
+jdbc.driver=com.mysql.cj.jdbc.Driver
+jdbc.url=jdbc:mysql://localhost:3306/tmall_ssm?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
 jdbc.username=root
 jdbc.password=admin
 ```
@@ -183,7 +183,7 @@ mvn clean package
 - Spring: 5.2.6.RELEASE
 - MyBatis: 3.5.6
 - MyBatis-Spring: 1.2.3
-- MySQL Connector: 5.1.6
+- MySQL Connector: 8.0.28
 - Druid: 1.18
 - PageHelper: 5.1.2-beta
 - Servlet API: 4.0.1

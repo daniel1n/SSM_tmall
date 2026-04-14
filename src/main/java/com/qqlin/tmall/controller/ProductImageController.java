@@ -18,8 +18,11 @@ import java.io.IOException;
 import java.util.List;
 
 /**
+ * Controller handling admin product image management.
+ * Manages both single product images and detail images.
+ * All endpoints are prefixed with /admin_productImage for admin backend management.
+ *
  * @author qqlin
- * @date 2020-5-20
  */
 @Controller
 @RequestMapping("")
@@ -35,6 +38,25 @@ public class ProductImageController {
         this.productImageService = productImageService;
     }
 
+    /**
+     * Add a new product image.
+     *
+     * URL: /admin_productImage_add
+     * Method: POST
+     * Parameters:
+     *   - ProductImage productImage: ProductImage object with pid and type (required)
+     *   - HttpSession session: Session for getting real path (required)
+     *   - UploadedImageFile uploadedImageFile: Image file to upload (required)
+     * Returns: Redirect to "admin_productImage_list" with product ID
+     *
+     * Business Logic:
+     * 1. Add product image to database to get ID
+     * 2. Determine image folder based on type (single or detail)
+     * 3. Save uploaded image as ID.jpg
+     * 4. Convert image to JPG format
+     * 5. If single type, create small (56x56) and middle (217x190) versions
+     * 6. Redirect to product image list
+     */
     @RequestMapping("admin_productImage_add")
     public String add(ProductImage productImage, HttpSession session, UploadedImageFile uploadedImageFile) {
         productImageService.add(productImage);
@@ -77,6 +99,22 @@ public class ProductImageController {
         return "redirect:admin_productImage_list?pid=" + productImage.getPid();
     }
 
+    /**
+     * Delete a product image by ID.
+     *
+     * URL: /admin_productImage_delete
+     * Method: GET
+     * Parameters:
+     *   - int id: ProductImage ID to delete (required)
+     * Returns: Redirect to "admin_productImage_list" with product ID
+     *
+     * Business Logic:
+     * 1. Fetch product image to get its type and product ID
+     * 2. Delete the main image file
+     * 3. If single type, also delete small and middle image versions
+     * 4. Delete product image from database
+     * 5. Redirect to product image list
+     */
     @RequestMapping("admin_productImage_delete")
     public String delete(int id, HttpSession session) {
         final ProductImage productImage = productImageService.get(id);
@@ -109,6 +147,21 @@ public class ProductImageController {
         return "redirect:admin_productImage_list?pid=" + productImage.getPid();
     }
 
+    /**
+     * Display product image list for a product.
+     *
+     * URL: /admin_productImage_list
+     * Method: GET
+     * Parameters:
+     *   - int pid: Product ID (required)
+     * Returns: "admin/listProductImage" (admin/listProductImage.jsp)
+     *
+     * Business Logic:
+     * 1. Fetch product by ID
+     * 2. Fetch all single images for the product
+     * 3. Fetch all detail images for the product
+     * 4. Return model with product and both image lists
+     */
     @RequestMapping("admin_productImage_list")
     public String list(int pid, Model model) {
         Product product = productService.get(pid);

@@ -3,11 +3,25 @@ package com.qqlin.tmall.pojo;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * MyBatis Example class for dynamic SQL query construction on PropertyValue entities.
+ * Used to build WHERE clauses programmatically for flexible querying.
+ *
+ * Usage example:
+ * <pre>
+ * PropertyValueExample example = new PropertyValueExample();
+ * example.createCriteria().andPidEqualTo(100);
+ * List<PropertyValue> values = propertyValueMapper.selectByExample(example);
+ * </pre>
+ */
 public class PropertyValueExample {
+    /** ORDER BY clause fragment, e.g., "id desc" or "value asc" */
     protected String orderByClause;
 
+    /** Whether to select distinct rows (eliminates duplicates) */
     protected boolean distinct;
 
+    /** List of OR-ed criteria for building complex WHERE clauses */
     protected List<Criteria> oredCriteria;
 
     public PropertyValueExample() {

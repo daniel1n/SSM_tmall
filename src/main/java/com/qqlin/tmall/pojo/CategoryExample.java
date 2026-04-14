@@ -3,11 +3,26 @@ package com.qqlin.tmall.pojo;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * MyBatis Example class for dynamic SQL query construction on Category entities.
+ * Used to build WHERE clauses programmatically for flexible querying.
+ *
+ * Usage example:
+ * <pre>
+ * CategoryExample example = new CategoryExample();
+ * example.createCriteria().andNameEqualTo("Electronics");
+ * example.setOrderByClause("id desc");
+ * List<Category> categories = categoryMapper.selectByExample(example);
+ * </pre>
+ */
 public class CategoryExample {
+    /** ORDER BY clause fragment, e.g., "id desc" or "name asc" */
     protected String orderByClause;
 
+    /** Whether to select distinct rows (eliminates duplicates) */
     protected boolean distinct;
 
+    /** List of OR-ed criteria for building complex WHERE clauses */
     protected List<Criteria> oredCriteria;
 
     public CategoryExample() {

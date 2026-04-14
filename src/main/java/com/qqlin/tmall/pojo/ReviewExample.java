@@ -4,11 +4,26 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * MyBatis Example class for dynamic SQL query construction on Review entities.
+ * Used to build WHERE clauses programmatically for flexible querying.
+ *
+ * Usage example:
+ * <pre>
+ * ReviewExample example = new ReviewExample();
+ * example.createCriteria().andPidEqualTo(100).andCreateDateGreaterThan(startDate);
+ * example.setOrderByClause("createDate desc");
+ * List<Review> reviews = reviewMapper.selectByExample(example);
+ * </pre>
+ */
 public class ReviewExample {
+    /** ORDER BY clause fragment, e.g., "id desc" or "createDate asc" */
     protected String orderByClause;
 
+    /** Whether to select distinct rows (eliminates duplicates) */
     protected boolean distinct;
 
+    /** List of OR-ed criteria for building complex WHERE clauses */
     protected List<Criteria> oredCriteria;
 
     public ReviewExample() {

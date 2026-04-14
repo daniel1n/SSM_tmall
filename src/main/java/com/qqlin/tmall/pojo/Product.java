@@ -3,36 +3,54 @@ package com.qqlin.tmall.pojo;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Product entity representing a item for sale in the e-commerce system.
+ * Products belong to a Category and have multiple ProductImages for visual display.
+ * Each product has pricing, stock management, and can have property values that describe its specifications.
+ */
 public class Product {
+    /** Unique identifier for the product */
     private Integer id;
 
+    /** Product name displayed to users */
     private String name;
 
+    /** Secondary title/subtitle for the product, often used for promotional descriptions */
     private String subTitle;
 
+    /** Original price before any discounts or promotions */
     private Float originalPrice;
 
+    /** Promotional price, typically set during sales events */
     private Float promotePrice;
 
+    /** Current inventory count available for sale */
     private Integer stock;
 
+    /** Foreign key to the category this product belongs to */
     private Integer cid;
 
+    /** Date when the product was created/added to the system */
     private Date createDate;
 
     /**
-     * 非数据库字段
+     * Non-database field: Associated Category object for display purposes
      */
     private Category category;
 
+    /** First/primary product image for thumbnail display */
     private ProductImage firstProductImage;
 
+    /** Single images for product listing pages (type="single") */
     private List<ProductImage> productSingleImages;
 
+    /** Detail images for product detail page (type="detail") */
     private List<ProductImage> productDetailImages;
 
+    /** Total number of units sold */
     private int saleCount;
 
+    /** Total number of customer reviews */
     private int reviewCount;
 
     public List<ProductImage> getProductSingleImages() {

@@ -5,39 +5,61 @@ import com.qqlin.tmall.service.OrderService;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Order entity representing a customer purchase transaction.
+ * Orders go through a lifecycle: created -> paid -> delivered -> confirmed -> completed
+ * Each order contains multiple OrderItems representing the products purchased.
+ */
 public class Order {
+    /** Unique identifier for the order */
     private Integer id;
 
+    /** Unique order code/number for tracking, e.g., "20231015-001" */
     private String orderCode;
 
+    /** Delivery address street address */
     private String address;
 
+    /** Postal/zip code for delivery */
     private String post;
 
+    /** Name of the person receiving the order */
     private String receiver;
 
+    /** Contact mobile phone number */
     private String mobile;
 
+    /** Optional message from the user to the seller */
     private String userMessage;
 
+    /** Date when the order was created */
     private Date createDate;
 
+    /** Date when payment was received */
     private Date payDate;
 
+    /** Date when the order was shipped/delivered */
     private Date deliveryDate;
 
+    /** Date when the buyer confirmed receipt */
     private Date confirmDate;
 
+    /** Foreign key to the user who placed the order */
     private Integer uid;
 
+    /** Order status: waitPay, waitDelivery, waitConfirm, waitReview, finish, delete */
     private String status;
 
+    /** List of items included in this order */
     private List<OrderItem> orderItems;
 
+    /** Associated User object for display purposes */
     private User user;
 
+    /** Total order amount */
     private float total;
 
+    /** Total number of items in the order */
     private int totalNumber;
 
     public List<OrderItem> getOrderItems() {

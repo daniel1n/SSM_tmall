@@ -20,8 +20,10 @@ import java.io.IOException;
 import java.util.List;
 
 /**
+ * Controller handling admin category CRUD operations.
+ * All endpoints are prefixed with /admin_category for admin backend management.
+ *
  * @author qqlin
- * @date 2020-5-18
  */
 @Controller
 @RequestMapping("")
@@ -38,6 +40,21 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
 
+    /**
+     * Display paginated list of all categories.
+     *
+     * URL: /admin_category_list
+     * Method: GET
+     * Parameters:
+     *   - Page page: Pagination parameters (start, count) (required)
+     * Returns: "admin/listCategory" (admin/listCategory.jsp)
+     *
+     * Business Logic:
+     * 1. Use PageHelper for pagination
+     * 2. Fetch all categories from database
+     * 3. Calculate total count for pagination
+     * 4. Return model with categories and page info
+     */
     @RequestMapping("admin_category_list")
     public String list(Model model, Page page) {
         /**
@@ -65,6 +82,24 @@ public class CategoryController {
         return "admin/listCategory";
     }
 
+    /**
+     * Add a new category.
+     *
+     * URL: /admin_category_add
+     * Method: POST
+     * Parameters:
+     *   - Category category: Category object with name (required)
+     *   - HttpSession session: Session for getting real path (required)
+     *   - UploadedImageFile uploadedImageFile: Category image file (required)
+     * Returns: Redirect to "admin_category_list"
+     *
+     * Business Logic:
+     * 1. Add category to database to get ID
+     * 2. Create image directory if not exists
+     * 3. Save uploaded image as category ID.jpg
+     * 4. Convert image to JPG format
+     * 5. Redirect to category list
+     */
     @RequestMapping("admin_category_add")
     public String add(Category category, HttpSession session, UploadedImageFile uploadedImageFile) throws IOException {
         categoryService.add(category);
@@ -80,6 +115,20 @@ public class CategoryController {
         return "redirect:/admin_category_list";
     }
 
+    /**
+     * Delete a category by ID.
+     *
+     * URL: /admin_category_delete
+     * Method: GET
+     * Parameters:
+     *   - int id: Category ID to delete (required)
+     * Returns: Redirect to "admin_category_list"
+     *
+     * Business Logic:
+     * 1. Delete category from database
+     * 2. Delete associated category image file
+     * 3. Redirect to category list
+     */
     @RequestMapping("admin_category_delete")
     public String delete(int id, HttpSession session) throws IOException {
         categoryService.delete(id);
@@ -91,6 +140,19 @@ public class CategoryController {
         return "redirect:/admin_category_list";
     }
 
+    /**
+     * Display category edit form.
+     *
+     * URL: /admin_category_edit
+     * Method: GET
+     * Parameters:
+     *   - int id: Category ID to edit (required)
+     * Returns: "admin/editCategory" (admin/editCategory.jsp)
+     *
+     * Business Logic:
+     * 1. Fetch category by ID
+     * 2. Return model with category for editing form
+     */
     @RequestMapping("admin_category_edit")
     public String edit(int id, Model model) throws IOException {
         Category category = categoryService.get(id);
@@ -98,6 +160,23 @@ public class CategoryController {
         return "admin/editCategory";
     }
 
+    /**
+     * Update an existing category.
+     *
+     * URL: /admin_category_update
+     * Method: POST
+     * Parameters:
+     *   - Category category: Category object with updated name (required)
+     *   - HttpSession session: Session for getting real path (required)
+     *   - UploadedImageFile uploadedImageFile: New category image (optional)
+     * Returns: Redirect to "admin_category_list"
+     *
+     * Business Logic:
+     * 1. Update category in database
+     * 2. If new image uploaded, save it as category ID.jpg
+     * 3. Convert image to JPG format if applicable
+     * 4. Redirect to category list
+     */
     @RequestMapping("admin_category_update")
     public String update(Category category, HttpSession session, UploadedImageFile uploadedImageFile) throws IOException {
         categoryService.update(category);

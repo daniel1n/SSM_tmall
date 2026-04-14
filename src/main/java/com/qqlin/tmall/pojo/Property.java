@@ -1,14 +1,23 @@
 package com.qqlin.tmall.pojo;
 
+/**
+ * Property entity representing a specification/attribute that products can have.
+ * Properties are defined at the Category level and specify what attributes products
+ * in that category can have (e.g., "Color", "Size", "Material", "RAM" for electronics).
+ * Examples: "Screen Size", "Storage Capacity", "Color", "Material"
+ */
 public class Property {
+    /** Unique identifier for the property */
     private Integer id;
 
+    /** Foreign key to the category this property belongs to */
     private Integer cid;
 
+    /** Property name, e.g., "Color", "Size", "RAM" */
     private String name;
 
     /**
-     * 非数据库字段
+     * Non-database field: Associated Category object for display purposes
      */
     private Category category;
 

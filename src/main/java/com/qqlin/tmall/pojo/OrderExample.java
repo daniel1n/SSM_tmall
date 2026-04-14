@@ -4,11 +4,26 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * MyBatis Example class for dynamic SQL query construction on Order entities.
+ * Used to build WHERE clauses programmatically for flexible querying.
+ *
+ * Usage example:
+ * <pre>
+ * OrderExample example = new OrderExample();
+ * example.createCriteria().andUidEqualTo(1).andStatusEqualTo("waitPay");
+ * example.setOrderByClause("createDate desc");
+ * List<Order> orders = orderMapper.selectByExample(example);
+ * </pre>
+ */
 public class OrderExample {
+    /** ORDER BY clause fragment, e.g., "id desc" or "createDate asc" */
     protected String orderByClause;
 
+    /** Whether to select distinct rows (eliminates duplicates) */
     protected boolean distinct;
 
+    /** List of OR-ed criteria for building complex WHERE clauses */
     protected List<Criteria> oredCriteria;
 
     public OrderExample() {
