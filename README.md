@@ -22,9 +22,13 @@
 | ORM | MyBatis Spring Boot | 2.2.2 |
 | 分页 | PageHelper Spring Boot | 1.4.7 |
 | 数据库 | MySQL + Connector | 8.0.28 |
-| 连接池 | Druid Spring Boot | 1.2.18 |
+| 连接池 | HikariCP | Spring Boot 默认 |
+| 缓存 | Redis + Spring Cache | Spring Boot Data Redis |
 | 视图 | JSP (嵌入式 Tomcat) | - |
 | 日志 | Logback (Spring Boot 默认) | - |
+| 热部署 | DevTools | Spring Boot 默认 |
+| 监控 | Actuator | Spring Boot 默认 |
+| 代码简化 | Lombok | 1.18.30 |
 
 ## 项目结构
 
@@ -35,6 +39,7 @@ SSM_tmall/
 │   ├── Application.java              # Spring Boot 启动类
 │   ├── config/
 │   │   ├── MybatisConfig.java       # MyBatis 配置
+│   │   ├── RedisCacheConfig.java    # Redis 缓存配置
 │   │   └── WebMvcConfig.java       # Spring MVC 配置
 │   ├── comparator/                  # 商品排序比较器
 │   ├── controller/                  # 控制器层
@@ -64,6 +69,8 @@ SSM_tmall/
 
 **详细升级说明**: [UPGRADE.md](./UPGRADE.md)
 
+**详细优化说明**: [OPTIMIZATION.md](./OPTIMIZATION.md)
+
 ## 数据模型
 
 ```
@@ -90,7 +97,7 @@ Order ──────────── OrderItem
 |------|------|
 | User | 用户 (name, password) |
 | Category | 分类 (name) |
-| Product | 商品 (name, subTitle, originalPrice, promotePrice, stock, createDate) |
+| Product | 商品 (name, subTitle, originalPrice, promotePrice, stock, version, createDate) |
 | ProductImage | 商品图片 (type: type_single/type_detail) |
 | Property | 属性 (名称，属于分类) |
 | PropertyValue | 属性值 (关联商品和属性) |
@@ -235,6 +242,35 @@ mvn spring-boot:run
 - 前台: http://localhost:8080/forehome
 - 管理后台: http://localhost:8080/admin_category_list
 
+## 优化特性
+
+### 金额精度 - BigDecimal
+
+使用 BigDecimal 替代 float/double 进行金额计算，避免浮点精度丢失：
+
+- `Product`: `originalPrice`、`promotePrice` 改为 BigDecimal
+- `Order`: `total` 改为 BigDecimal
+- MyBatis Mapper JDBC 类型改为 DECIMAL
+
+### N+1 查询问题修复
+
+- `ProductService.listByIds()` 批量查询方法
+- `OrderItemServiceImpl.setProduct()` 使用 Map 关联，避免循环查询
+
+### 并发控制
+
+- **乐观锁**: `Product.version` 字段 + `updateWithOptimisticLock`
+- **原子库存扣减**: `ProductMapper.decreaseStock()` SQL 级库存校验
+
+### 缓存优化 - Redis + Spring Cache
+
+| 缓存名称 | 服务 | 缓存方法 | 说明 |
+|---------|------|---------|------|
+| categories | CategoryService | list(), get() | 分类数据缓存 |
+| products | ProductService | get(), list(), listByIds() | 商品数据缓存 |
+
+数据变更时自动通过 `@CacheEvict` 清除缓存。
+
 ## 依赖版本
 
 | 依赖 | 版本 |
@@ -243,5 +279,7 @@ mvn spring-boot:run
 | MyBatis Spring Boot | 2.2.2 |
 | PageHelper Spring Boot | 1.4.7 |
 | MySQL Connector | 8.0.28 |
-| Druid Spring Boot | 1.2.18 |
+| HikariCP | Spring Boot 默认 |
+| Spring Data Redis | Spring Boot 默认 |
 | Commons Lang3 | 3.x |
+| Lombok | 1.18.30 |
