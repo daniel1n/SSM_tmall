@@ -2,6 +2,7 @@ package com.qqlin.tmall.pojo;
 
 import com.qqlin.tmall.service.OrderService;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -56,8 +57,8 @@ public class Order {
     /** Associated User object for display purposes */
     private User user;
 
-    /** Total order amount */
-    private float total;
+    /** Total order amount (using BigDecimal for precision) */
+    private BigDecimal total;
 
     /** Total number of items in the order */
     private int totalNumber;
@@ -78,11 +79,11 @@ public class Order {
         this.user = user;
     }
 
-    public float getTotal() {
+    public BigDecimal getTotal() {
         return total;
     }
 
-    public void setTotal(float total) {
+    public void setTotal(BigDecimal total) {
         this.total = total;
     }
 

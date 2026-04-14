@@ -5,29 +5,21 @@ spring:
   application:
     name: tmall-ssm
 
-  # 数据源配置 (Druid)
+  # 数据源配置 (HikariCP - Spring Boot 默认连接池)
   datasource:
-    type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/tmall_ssm?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false
     username: root
     password: admin
-    # Druid 连接池配置
-    druid:
-      initial-size: 5
-      min-idle: 5
-      max-active: 20
-      max-wait: 60000
-      time-between-eviction-runs-millis: 60000
-      min-evictable-idle-time-millis: 300000
-      validation-query: SELECT 1
-      test-while-idle: true
-      test-on-borrow: false
-      test-on-return: false
-      pool-prepared-statements: true
-      max-pool-prepared-statement-per-connection-size: 20
-      filters: stat,wall,log4j2
-      connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+    # HikariCP 连接池配置 (Spring Boot 默认，性能优异)
+    hikari:
+      pool-name: tmall-hikari-pool
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      connection-timeout: 30000
+      connection-test-query: SELECT 1
 
   # JSP 视图解析配置
   mvc:
@@ -60,8 +52,6 @@ mybatis:
     lazy-loading-enabled: true
     # 积极加载 (避免延迟加载导致的 N+1 问题)
     aggressive-lazy-loading: false
-    # 日志输出 (便于调试)
-    log-impl: org.apache.commons.logging.impl.Log4JLogFactory
 
 # PageHelper 分页插件配置
 pagehelper:
@@ -70,7 +60,7 @@ pagehelper:
   support-methods-arguments: true
   params: count=countSql
 
-# 日志配置
+# 日志配置 (Logback - Spring Boot 默认)
 logging:
   level:
     root: INFO
@@ -78,8 +68,16 @@ logging:
     com.qqlin.tmall.mapper: DEBUG
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
-  log4j:
-    config: classpath:log4j.properties
+
+# Actuator 监控端点配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,env
+  endpoint:
+    health:
+      show-details: when-authorized
 
 # 服务器配置
 server:

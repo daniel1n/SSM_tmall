@@ -1,5 +1,6 @@
 package com.qqlin.tmall.pojo;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -19,10 +20,10 @@ public class Product {
     private String subTitle;
 
     /** Original price before any discounts or promotions */
-    private Float originalPrice;
+    private BigDecimal originalPrice;
 
     /** Promotional price, typically set during sales events */
-    private Float promotePrice;
+    private BigDecimal promotePrice;
 
     /** Current inventory count available for sale */
     private Integer stock;
@@ -125,19 +126,19 @@ public class Product {
         this.subTitle = subTitle == null ? null : subTitle.trim();
     }
 
-    public Float getOriginalPrice() {
+    public BigDecimal getOriginalPrice() {
         return originalPrice;
     }
 
-    public void setOriginalPrice(Float originalPrice) {
+    public void setOriginalPrice(BigDecimal originalPrice) {
         this.originalPrice = originalPrice;
     }
 
-    public Float getPromotePrice() {
+    public BigDecimal getPromotePrice() {
         return promotePrice;
     }
 
-    public void setPromotePrice(Float promotePrice) {
+    public void setPromotePrice(BigDecimal promotePrice) {
         this.promotePrice = promotePrice;
     }
 

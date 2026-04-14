@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.util.HtmlUtils;
 
 import javax.servlet.http.HttpSession;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -346,31 +347,8 @@ public class ForeController {
      */
     @RequestMapping("forebuyone")
     public String buyOne(int pid, int num, HttpSession session) {
-        Product product = productService.get(pid);
-        int orderItemId = 0;
-
         User user = (User) session.getAttribute("user");
-        boolean found = false;
-        List<OrderItem> orderItems = orderItemService.listByUser(user.getId());
-        for (OrderItem orderItem : orderItems) {
-            if (orderItem.getProduct().getId().intValue() == product.getId().intValue()) {
-                orderItem.setNumber(orderItem.getNumber() + num);
-                orderItemService.update(orderItem);
-                found = true;
-                orderItemId = orderItem.getPid();
-                break;
-            }
-        }
-
-        if (!found) {
-            OrderItem orderItem = new OrderItem();
-            orderItem.setUid(user.getId());
-            orderItem.setNumber(num);
-            orderItem.setPid(pid);
-            orderItemService.add(orderItem);
-            orderItemId = orderItem.getId();
-        }
-
+        int orderItemId = addOrUpdateCartItem(user.getId(), pid, num);
         return "redirect:forebuy?oiid=" + orderItemId;
     }
 
@@ -393,12 +371,14 @@ public class ForeController {
     @RequestMapping("forebuy")
     public String buy(Model model, String[] oiid, HttpSession session) {
         List<OrderItem> ois = new ArrayList<>();
-        float total = 0;
+        BigDecimal total = BigDecimal.ZERO;
 
         for (String strid : oiid) {
             int id = Integer.parseInt(strid);
             OrderItem oi = orderItemService.get(id);
-            total += oi.getProduct().getPromotePrice() * oi.getNumber();
+            BigDecimal itemTotal = oi.getProduct().getPromotePrice()
+                    .multiply(BigDecimal.valueOf(oi.getNumber()));
+            total = total.add(itemTotal);
             ois.add(oi);
         }
 
@@ -426,28 +406,8 @@ public class ForeController {
     @RequestMapping("foreaddCart")
     @ResponseBody
     public String addCart(int pid, int num, Model model, HttpSession session) {
-        Product product = productService.get(pid);
         User user = (User) session.getAttribute("user");
-        boolean found = false;
-
-        List<OrderItem> orderItems = orderItemService.listByUser(user.getId());
-        for (OrderItem orderItem : orderItems) {
-            if (orderItem.getProduct().getId().intValue() == product.getId().intValue()) {
-                orderItem.setNumber(orderItem.getNumber() + num);
-                orderItemService.update(orderItem);
-                found = true;
-                break;
-            }
-        }
-
-        if (!found) {
-            OrderItem orderItem = new OrderItem();
-            orderItem.setUid(user.getId());
-            orderItem.setNumber(num);
-            orderItem.setPid(pid);
-            orderItemService.add(orderItem);
-        }
-
+        addOrUpdateCartItem(user.getId(), pid, num);
         return "success";
     }
 
@@ -559,7 +519,7 @@ public class ForeController {
         order.setStatus(OrderService.WAIT_PAY);
         List<OrderItem> orderItems = (List<OrderItem>) session.getAttribute("ois");
 
-        float total = orderService.add(order, orderItems);
+        BigDecimal total = orderService.add(order, orderItems);
         return "redirect:forealipay?oid=" + order.getId() + "&total=" + total;
 
     }
@@ -762,6 +722,32 @@ public class ForeController {
         reviewService.add(review);
 
         return "redirect:forereview?oid=" + oid + "&showonly=true";
+    }
+
+    /**
+     * Helper method to add or update a cart item.
+     * Checks if the product already exists in user's cart, updates quantity if so, otherwise creates new item.
+     *
+     * @param uid User ID
+     * @param pid Product ID
+     * @param num Quantity to add
+     * @return OrderItem ID
+     */
+    private int addOrUpdateCartItem(int uid, int pid, int num) {
+        List<OrderItem> orderItems = orderItemService.listByUser(uid);
+        for (OrderItem orderItem : orderItems) {
+            if (orderItem.getProduct().getId().intValue() == pid) {
+                orderItem.setNumber(orderItem.getNumber() + num);
+                orderItemService.update(orderItem);
+                return orderItem.getId();
+            }
+        }
+        OrderItem orderItem = new OrderItem();
+        orderItem.setUid(uid);
+        orderItem.setNumber(num);
+        orderItem.setPid(pid);
+        orderItemService.add(orderItem);
+        return orderItem.getId();
     }
 }
 

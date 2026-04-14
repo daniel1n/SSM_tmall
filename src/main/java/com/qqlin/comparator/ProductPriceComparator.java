@@ -35,6 +35,6 @@ public class ProductPriceComparator implements Comparator<Product> {
      */
     @Override
     public int compare(Product o1, Product o2) {
-        return (int) (o1.getPromotePrice() - o2.getPromotePrice());
+        return o1.getPromotePrice().compareTo(o2.getPromotePrice());
     }
 }

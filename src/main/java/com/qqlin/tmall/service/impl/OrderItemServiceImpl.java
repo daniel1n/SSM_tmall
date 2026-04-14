@@ -10,6 +10,7 @@ import com.qqlin.tmall.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -73,10 +74,12 @@ public class OrderItemServiceImpl implements OrderItemService {
         List<OrderItem> orderItems = orderItemMapper.selectByExample(example);
         setProduct(orderItems);
 
-        float total = 0;
+        BigDecimal total = BigDecimal.ZERO;
         int totalNumber = 0;
         for (OrderItem orderItem : orderItems) {
-            total += orderItem.getNumber() * orderItem.getProduct().getPromotePrice();
+            BigDecimal itemTotal = orderItem.getProduct().getPromotePrice()
+                    .multiply(BigDecimal.valueOf(orderItem.getNumber()));
+            total = total.add(itemTotal);
             totalNumber += orderItem.getNumber();
         }
         order.setTotal(total);
@@ -95,11 +98,7 @@ public class OrderItemServiceImpl implements OrderItemService {
         OrderItemExample example = new OrderItemExample();
         example.createCriteria().andPidEqualTo(pid);
         List<OrderItem> orderItems = orderItemMapper.selectByExample(example);
-        int result = 0;
-        for (OrderItem orderItem : orderItems) {
-            result += orderItem.getNumber();
-        }
-        return result;
+        return orderItems.stream().mapToInt(OrderItem::getNumber).sum();
     }
 
     @Override

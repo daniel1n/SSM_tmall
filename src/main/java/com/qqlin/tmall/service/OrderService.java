@@ -3,6 +3,7 @@ package com.qqlin.tmall.service;
 import com.qqlin.tmall.pojo.Order;
 import com.qqlin.tmall.pojo.OrderItem;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -85,9 +86,9 @@ public interface OrderService {
      *
      * @param order      Order entity to add
      * @param orderItems List of order items associated with this order
-     * @return Total order amount
+     * @return Total order amount (using BigDecimal for precision)
      */
-    float add(Order order, List<OrderItem> orderItems);
+    BigDecimal add(Order order, List<OrderItem> orderItems);
 
     /**
      * Get all orders for a specific user, excluding orders with a given status.
