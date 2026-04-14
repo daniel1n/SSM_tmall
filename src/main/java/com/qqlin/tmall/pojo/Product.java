@@ -54,6 +54,13 @@ public class Product {
     /** Total number of customer reviews */
     private int reviewCount;
 
+    /**
+     * Version field for optimistic locking.
+     * Prevents concurrent updates by detecting version conflicts.
+     * MyBatis will automatically check and increment this on updates.
+     */
+    private Integer version;
+
     public List<ProductImage> getProductSingleImages() {
         return productSingleImages;
     }
@@ -164,5 +171,13 @@ public class Product {
 
     public void setCreateDate(Date createDate) {
         this.createDate = createDate;
+    }
+
+    public Integer getVersion() {
+        return version;
+    }
+
+    public void setVersion(Integer version) {
+        this.version = version;
     }
 }

@@ -114,4 +114,14 @@ public interface ProductService {
      * @return List of products matching the given IDs
      */
     List<Product> listByIds(List<Integer> ids);
+
+    /**
+     * Atomically decrease product stock.
+     * Thread-safe operation that prevents overselling.
+     *
+     * @param pid Product ID
+     * @param number Number of items to deduct
+     * @return true if stock was successfully decreased, false if insufficient stock
+     */
+    boolean decreaseStock(int pid, int number);
 }

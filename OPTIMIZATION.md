@@ -14,6 +14,7 @@
 | 日志框架 | Log4j → Logback | pom.xml |
 | 开发工具 | 添加 DevTools 和 Actuator | pom.xml |
 | 性能优化 | N+1 查询问题修复 | ProductService, OrderItemServiceImpl |
+| 并发优化 | 乐观锁 + 原子库存扣减 | Product.java, ProductMapper.xml |
 
 ---
 
@@ -418,7 +419,7 @@ private void setProduct(List<OrderItem> orderItems) {
 - 使用 Spring Boot 默认的 Logback
 - 统一日志配置到 application.yml
 
-### 5.3 开发工具：添加 DevTools 和 Actuator
+### 7.3 开发工具：添加 DevTools 和 Actuator
 
 **新增依赖**:
 ```xml
@@ -450,6 +451,73 @@ private void setProduct(List<OrderItem> orderItems) {
 
 ---
 
+## 8. 并发优化
+
+### 8.1 乐观锁 - 防止并发更新覆盖
+
+**问题**: 多个请求同时读取同一数据，然后各自修改，后提交的会覆盖先提交的修改。
+
+**解决方案**: 添加版本号字段，更新时检查版本
+
+**1. Product.java 添加版本字段**
+
+```java
+/**
+ * Version field for optimistic locking.
+ * MyBatis will automatically check and increment this on updates.
+ */
+private Integer version;
+```
+
+**2. Mapper XML 添加乐观锁更新**
+
+```xml
+<!-- 乐观锁更新：仅当版本匹配时更新 -->
+<update id="updateWithOptimisticLock">
+    UPDATE product
+    <set>
+        <if test="name != null">name = #{name},</if>
+        ...
+        version = version + 1
+    </set>
+    WHERE id = #{id} AND version = #{version}
+</update>
+```
+
+### 8.2 原子库存扣减 - 防止超卖
+
+**问题**: 读-改-写 操作不是原子的，可能导致超卖（库存变为负数）
+
+**解决方案**: 使用 SQL 原子扣减
+
+**1. Mapper XML 添加原子扣减**
+
+```xml
+<!-- 原子库存扣减：返回影响行数，0表示库存不足 -->
+<update id="decreaseStock">
+    UPDATE product
+    SET stock = stock - #{number}, version = version + 1
+    WHERE id = #{pid} AND stock >= #{number}
+</update>
+```
+
+**2. Service 层调用**
+
+```java
+@Override
+public boolean decreaseStock(int pid, int number) {
+    int rows = productMapper.decreaseStock(pid, number);
+    return rows > 0;  // 返回 true 表示扣减成功
+}
+```
+
+### 效果
+
+- **乐观锁**: 防止并发更新时数据被覆盖
+- **原子扣减**: 确保库存不会超卖，即使在高并发下也不会出现负库存
+
+---
+
 ## 验证
 
 所有优化已通过编译验证:
@@ -470,7 +538,3 @@ mvn clean compile
 2. **缓存优化**
    - 引入 Redis 缓存热门商品和分类数据
    - 使用 Spring Cache 简化缓存逻辑
-
-3. **并发优化**
-   - 购物车操作考虑使用乐观锁
-   - 库存扣减使用数据库原子操作

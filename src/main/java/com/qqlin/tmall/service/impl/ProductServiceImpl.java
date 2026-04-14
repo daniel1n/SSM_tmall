@@ -170,4 +170,10 @@ public class ProductServiceImpl implements ProductService {
         setCategory(products);
         return products;
     }
+
+    @Override
+    public boolean decreaseStock(int pid, int number) {
+        int rows = productMapper.decreaseStock(pid, number);
+        return rows > 0;
+    }
 }
