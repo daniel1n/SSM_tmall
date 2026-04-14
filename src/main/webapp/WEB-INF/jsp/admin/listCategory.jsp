@@ -6,6 +6,10 @@
 <%@include file="../include/admin/adminNavigator.jsp" %>
 
 <script>
+    /**
+     * 表单验证
+     * 提交前检查分类名称和图片是否为空
+     */
     $(function () {
 
         $("#addForm").submit(function () {

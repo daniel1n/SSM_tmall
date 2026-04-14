@@ -2,7 +2,12 @@
          pageEncoding="UTF-8" isELIgnored="false" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
+<%-- 商品分类页排序栏 - 支持综合/人气/新品/销量/价格排序及价格区间筛选 --%>
 <script>
+    /**
+     * 价格区间筛选
+     * 用户输入起始价和结束价后，隐藏不在价格范围内的商品
+     */
     $(function () {
         $("input.sortBarPrice").keyup(function () {
             var num = $(this).val();
