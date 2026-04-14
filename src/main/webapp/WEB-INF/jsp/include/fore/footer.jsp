@@ -1,32 +1,44 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
          pageEncoding="UTF-8" isELIgnored="false" %>
 
+<%-- 前台页面底部 --%>
+<%-- 功能: 品质保障图标、购物指南、天猫保障、支付方式、商家服务、手机天猫二维码、版权信息 --%>
+<%-- 注意: 所有外链使用 #nowhere 占位，实际功能未实现 --%>
+
+<%-- 引入登录注册模态框组件 --%>
 <%@include file="modal.jsp" %>
 
+<%-- 网站底部容器 --%>
 <div id="footer" class="footer" style="display: block;">
 
+    <%-- 品质保障图标区域 --%>
     <div id="footer_ensure" class="footer_ensure">
         <a href="#nowhere">
             <img src="img/site/ensure.png">
         </a>
     </div>
 
+    <%-- 水平分隔线 --%>
     <div class="horizontal_line">
     </div>
 
+    <%-- 底部服务条款区域 - 5列布局 --%>
     <div id="footer_desc" class="footer_desc">
+        <%-- 购物指南 --%>
         <div class="descColumn">
             <span class="descColumnTitle">购物指南</span>
             <a href="#nowhere">免费注册</a>
             <a href="#nowhere">开通支付宝</a>
             <a href="#nowhere">支付宝充值</a>
         </div>
+        <%-- 天猫保障 --%>
         <div class="descColumn">
             <span class="descColumnTitle">天猫保障</span>
             <a href="#nowhere">发票保障</a>
             <a href="#nowhere">售后规则</a>
             <a href="#nowhere">缺货赔付</a>
         </div>
+        <%-- 支付方式 --%>
         <div class="descColumn">
             <span class="descColumnTitle">支付方式</span>
             <a href="#nowhere">快捷支付</a>
@@ -34,6 +46,7 @@
             <a href="#nowhere">蚂蚁花呗</a>
             <a href="#nowhere">货到付款</a>
         </div>
+        <%-- 商家服务 --%>
         <div class="descColumn">
             <span class="descColumnTitle">商家服务</span>
             <a href="#nowhere">商家入驻</a>
@@ -44,6 +57,7 @@
             <a href="#nowhere">喵言喵语</a>
             <a href="#nowhere">运营服务</a>
         </div>
+        <%-- 手机天猫 --%>
         <div class="descColumn">
             <span class="descColumnTitle">手机天猫</span>
             <a href="#nowhere"><img src="img/site/ma.png"></a>
@@ -55,9 +69,12 @@
 
     </div>
 
+    <%-- 版权信息区域 --%>
     <div id="copyright" class="copyright">
         <div class="coptyrightMiddle">
+            <%-- 猫眼图标 --%>
             <img id="cateye" class="cateye" src="img/site/cateye.png">
+            <%-- 法律声明链接 --%>
             <div class="white_link">
                 <a href="#nowhere" style="padding-left:0px">关于天猫</a>
                 <a href="#nowhere"> 帮助中心</a>
@@ -69,6 +86,7 @@
                 <a href="#nowhere">知识产权</a>
                 <a href="#nowhere"> 廉正举报 </a>
             </div>
+            <%-- 阿里巴巴集团旗下网站链接 --%>
             <div class="white_link">
                 <a href="#nowhere" style="padding-left:0px"> 阿里巴巴集团</a><span class="slash">|</span>
                 <a href="#nowhere"> 淘宝网</a><span class="slash">|</span>
@@ -94,6 +112,7 @@
                 <a href="#nowhere"> 支付宝 </a>
             </div>
 
+            <%-- 许可证和版权 --%>
             <div class="license">
                 <span>增值电信业务经营许可证： 浙B2-20110446</span>
                 <span>网络文化经营许可证：浙网文[2015]0295-065号</span>

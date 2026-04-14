@@ -1,11 +1,24 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
          pageEncoding="UTF-8" isELIgnored="false" %>
 
+<%-- 我的订单页面组件 --%>
+<%-- 功能: 显示用户所有订单、支持按状态筛选、删除订单 --%>
+<%-- 依赖变量: os (Order 列表，包含 orderItems) --%>
+
 <script>
+    // 是否确认删除订单标记
     var deleteOrder = false;
+    // 要删除的订单ID
     var deleteOrderid = 0;
 
+    /**
+     * 页面加载完成后初始化
+     * 1. 订单状态筛选 (全部/待付款/待发货/待收货/待评价)
+     * 2. 删除订单按钮事件
+     * 3. 催发货按钮事件
+     */
     $(function () {
+        // 订单状态筛选
         $("a[orderStatus]").click(function () {
             var orderStatus = $(this).attr("orderStatus");
             if ('all' == orderStatus) {
@@ -19,17 +32,20 @@
             $(this).parent("div").addClass("selectedOrderType");
         });
 
+        // 删除订单 - 点击后弹出确认框
         $("a.deleteOrderLink").click(function () {
             deleteOrderid = $(this).attr("oid");
             deleteOrder = false;
             $("#deleteConfirmModal").modal("show");
         });
 
+        // 确认删除按钮
         $("button.deleteConfirmButton").click(function () {
             deleteOrder = true;
             $("#deleteConfirmModal").modal('hide');
         });
 
+        // 模态框关闭后执行删除
         $('#deleteConfirmModal').on('hidden.bs.modal', function (e) {
             if (deleteOrder) {
                 var page = "foredeleteOrder";
@@ -48,6 +64,7 @@
             }
         })
 
+        // 催发货按钮 - 模拟秒发
         $(".ask2delivery").click(function () {
             var link = $(this).attr("link");
             $(this).hide();
@@ -64,7 +81,9 @@
 
 </script>
 
+<%-- 订单容器 --%>
 <div class="boughtDiv">
+    <%-- 订单状态筛选栏 --%>
     <div class="orderType">
         <div class="selectedOrderType"><a orderStatus="all" href="#nowhere">所有订单</a></div>
         <div><a orderStatus="waitPay" href="#nowhere">待付款</a></div>
@@ -74,6 +93,8 @@
         <div class="orderTypeLastOne"><a class="noRightborder"></a></div>
     </div>
     <div style="clear:both"></div>
+
+    <%-- 订单列表标题栏 --%>
     <div class="orderListTitle">
         <table class="orderListTitleTable">
             <tr>
@@ -87,9 +108,12 @@
 
     </div>
 
+    <%-- 订单列表 --%>
     <div class="orderListItem">
         <c:forEach items="${os}" var="o">
+            <%-- 订单表格，orderStatus 属性用于状态筛选 --%>
             <table class="orderListItemTable" orderStatus="${o.status}" oid="${o.id}">
+                <%-- 订单头部信息 --%>
                 <tr class="orderListItemFirstTR">
                     <td colspan="2">
                         <b><fmt:formatDate value="${o.createDate}" pattern="yyyy-MM-dd HH:mm:ss"/></b>
@@ -110,11 +134,14 @@
 
                     </td>
                 </tr>
+                <%-- 订单商品列表 --%>
                 <c:forEach items="${o.orderItems}" var="oi" varStatus="st">
                     <tr class="orderItemProductInfoPartTR">
+                        <%-- 商品图片 --%>
                         <td class="orderItemProductInfoPartTD"><img width="80" height="80"
                                                                     src="img/productSingle_middle/${oi.product.firstProductImage.id}.jpg">
                         </td>
+                        <%-- 商品信息 --%>
                         <td class="orderItemProductInfoPartTD">
                             <div class="orderListItemProductLinkOutDiv">
                                 <a href="foreproduct?pid=${oi.product.id}">${oi.product.name}</a>
@@ -125,6 +152,7 @@
                                 </div>
                             </div>
                         </td>
+                        <%-- 单价 --%>
                         <td class="orderItemProductInfoPartTD" width="100px">
 
                             <div class="orderListItemProductOriginalPrice">￥<fmt:formatNumber type="number"
@@ -135,6 +163,7 @@
                                                                                       minFractionDigits="2"/></div>
 
                         </td>
+                        <%-- 数量、实付款、交易操作 (仅第一行显示) --%>
                         <c:if test="${st.count==1}">
 
                             <td valign="top" rowspan="${fn:length(o.orderItems)}"
@@ -151,23 +180,25 @@
                             </td>
                             <td valign="top" rowspan="${fn:length(o.orderItems)}"
                                 class="orderListItemButtonTD orderItemOrderInfoPartTD" width="100px">
+                                <%-- 待收货状态: 显示确认收货按钮 --%>
                                 <c:if test="${o.status=='waitConfirm' }">
                                     <a href="foreconfirmPay?oid=${o.id}">
                                         <button class="orderListItemConfirm">确认收货</button>
                                     </a>
                                 </c:if>
+                                <%-- 待付款状态: 显示付款按钮 --%>
                                 <c:if test="${o.status=='waitPay' }">
                                     <a href="forealipay?oid=${o.id}&total=${o.total}">
                                         <button class="orderListItemConfirm">付款</button>
                                     </a>
                                 </c:if>
 
+                                <%-- 待发货状态: 显示待发货 --%>
                                 <c:if test="${o.status=='waitDelivery' }">
                                     <span>待发货</span>
-                                    <%--                                     <button class="btn btn-info btn-sm ask2delivery" link="admin_order_delivery?id=${o.id}">催卖家发货</button> --%>
-
                                 </c:if>
 
+                                <%-- 待评价状态: 显示评价按钮 --%>
                                 <c:if test="${o.status=='waitReview' }">
                                     <a href="forereview?oid=${o.id}">
                                         <button class="orderListItemReview">评价</button>
