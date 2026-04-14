@@ -1,10 +1,18 @@
 package com.qqlin.tmall.pojo;
 
+/**
+ * User entity representing a customer in the e-commerce system.
+ * Users can browse products, write reviews, place orders, and manage their account.
+ * Authentication is typically done via name (username) and password.
+ */
 public class User {
+    /** Unique identifier for the user */
     private Integer id;
 
+    /** Username for login and display purposes */
     private String name;
 
+    /** User's password (typically encrypted in production) */
     private String password;
 
     public Integer getId() {

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -68,18 +69,16 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackForClassName = "Exception")
-    public float add(Order order, List<OrderItem> orderItems) {
-        float total = 0;
+    public BigDecimal add(Order order, List<OrderItem> orderItems) {
+        BigDecimal total = BigDecimal.ZERO;
         add(order);
-
-        if (false) {
-            throw new RuntimeException();
-        }
 
         for (OrderItem orderItem : orderItems) {
             orderItem.setOid(order.getId());
             orderItemService.update(orderItem);
-            total += orderItem.getProduct().getPromotePrice() * orderItem.getNumber();
+            BigDecimal itemTotal = orderItem.getProduct().getPromotePrice()
+                    .multiply(BigDecimal.valueOf(orderItem.getNumber()));
+            total = total.add(itemTotal);
         }
         return total;
     }

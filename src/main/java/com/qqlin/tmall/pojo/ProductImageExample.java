@@ -3,11 +3,25 @@ package com.qqlin.tmall.pojo;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * MyBatis Example class for dynamic SQL query construction on ProductImage entities.
+ * Used to build WHERE clauses programmatically for flexible querying.
+ *
+ * Usage example:
+ * <pre>
+ * ProductImageExample example = new ProductImageExample();
+ * example.createCriteria().andPidEqualTo(100).andTypeEqualTo("single");
+ * List<ProductImage> images = productImageMapper.selectByExample(example);
+ * </pre>
+ */
 public class ProductImageExample {
+    /** ORDER BY clause fragment, e.g., "id asc" */
     protected String orderByClause;
 
+    /** Whether to select distinct rows (eliminates duplicates) */
     protected boolean distinct;
 
+    /** List of OR-ed criteria for building complex WHERE clauses */
     protected List<Criteria> oredCriteria;
 
     public ProductImageExample() {

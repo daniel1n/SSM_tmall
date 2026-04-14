@@ -10,6 +10,7 @@ import com.qqlin.tmall.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -51,6 +52,34 @@ public class OrderItemServiceImpl implements OrderItemService {
         result.setProduct(product);
     }
 
+    /**
+     * Batch set products for multiple order items using optimized query.
+     * Fixes N+1 query problem by fetching all products in a single database call.
+     *
+     * @param orderItems List of order items to populate with products
+     */
+    private void setProduct(List<OrderItem> orderItems) {
+        if (orderItems == null || orderItems.isEmpty()) {
+            return;
+        }
+        // Extract all product IDs
+        List<Integer> pids = orderItems.stream()
+                .map(OrderItem::getPid)
+                .collect(java.util.stream.Collectors.toList());
+
+        // Batch fetch all products in ONE query
+        List<Product> products = productService.listByIds(pids);
+
+        // Create a map for quick lookup: pid -> Product
+        java.util.Map<Integer, Product> productMap = products.stream()
+                .collect(java.util.stream.Collectors.toMap(Product::getId, p -> p));
+
+        // Associate products with order items
+        for (OrderItem orderItem : orderItems) {
+            orderItem.setProduct(productMap.get(orderItem.getPid()));
+        }
+    }
+
     @Override
     public List<OrderItem> list() {
         OrderItemExample example = new OrderItemExample();
@@ -73,10 +102,12 @@ public class OrderItemServiceImpl implements OrderItemService {
         List<OrderItem> orderItems = orderItemMapper.selectByExample(example);
         setProduct(orderItems);
 
-        float total = 0;
+        BigDecimal total = BigDecimal.ZERO;
         int totalNumber = 0;
         for (OrderItem orderItem : orderItems) {
-            total += orderItem.getNumber() * orderItem.getProduct().getPromotePrice();
+            BigDecimal itemTotal = orderItem.getProduct().getPromotePrice()
+                    .multiply(BigDecimal.valueOf(orderItem.getNumber()));
+            total = total.add(itemTotal);
             totalNumber += orderItem.getNumber();
         }
         order.setTotal(total);
@@ -84,22 +115,12 @@ public class OrderItemServiceImpl implements OrderItemService {
         order.setOrderItems(orderItems);
     }
 
-    private void setProduct(List<OrderItem> orderItems) {
-        for (OrderItem orderItem : orderItems) {
-            setProduct(orderItem);
-        }
-    }
-
     @Override
     public int getSaleCount(int pid) {
         OrderItemExample example = new OrderItemExample();
         example.createCriteria().andPidEqualTo(pid);
         List<OrderItem> orderItems = orderItemMapper.selectByExample(example);
-        int result = 0;
-        for (OrderItem orderItem : orderItems) {
-            result += orderItem.getNumber();
-        }
-        return result;
+        return orderItems.stream().mapToInt(OrderItem::getNumber).sum();
     }
 
     @Override

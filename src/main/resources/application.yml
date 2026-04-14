@@ -1,0 +1,104 @@
+# Spring Boot 2.7.18 配置文件
+# 仿天猫商城系统配置
+
+spring:
+  application:
+    name: tmall-ssm
+
+  # 数据源配置 (HikariCP - Spring Boot 默认连接池)
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/tmall_ssm?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false
+    username: root
+    password: admin
+    # HikariCP 连接池配置 (Spring Boot 默认，性能优异)
+    hikari:
+      pool-name: tmall-hikari-pool
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      connection-timeout: 30000
+      connection-test-query: SELECT 1
+
+  # JSP 视图解析配置
+  mvc:
+    view:
+      prefix: /WEB-INF/jsp/
+      suffix: .jsp
+
+  # 文件上传配置
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 20MB
+
+  # 静态资源路径配置
+  resources:
+    static-locations: classpath:/static/,file:./images/
+
+  # Redis 缓存配置
+  redis:
+    host: localhost
+    port: 6379
+    password:
+    database: 0
+    timeout: 3000
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        max-wait: -1
+
+# MyBatis 配置
+mybatis:
+  # Mapper XML 文件路径
+  mapper-locations: classpath:mapper/**/*.xml
+  # 实体类别名包路径
+  type-aliases-package: com.qqlin.tmall.pojo
+  # MyBatis 配置
+  configuration:
+    # 开启下划线命名转驼峰命名 (数据库: create_date -> Java: createDate)
+    map-underscore-to-camel-case: true
+    # 开启延迟加载 (按需加载)
+    lazy-loading-enabled: true
+    # 积极加载 (避免延迟加载导致的 N+1 问题)
+    aggressive-lazy-loading: false
+
+# PageHelper 分页插件配置
+pagehelper:
+  helper-dialect: mysql
+  reasonable: true
+  support-methods-arguments: true
+  params: count=countSql
+
+# 日志配置 (Logback - Spring Boot 默认)
+logging:
+  level:
+    root: INFO
+    com.qqlin.tmall: DEBUG
+    com.qqlin.tmall.mapper: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# Actuator 监控端点配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,env
+  endpoint:
+    health:
+      show-details: when-authorized
+
+# 服务器配置
+server:
+  port: 8080
+  servlet:
+    context-path: /
+  tomcat:
+    uri-encoding: UTF-8
+    max-threads: 200
+    accept-count: 100

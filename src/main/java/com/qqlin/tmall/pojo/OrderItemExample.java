@@ -3,11 +3,25 @@ package com.qqlin.tmall.pojo;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * MyBatis Example class for dynamic SQL query construction on OrderItem entities.
+ * Used to build WHERE clauses programmatically for flexible querying.
+ *
+ * Usage example:
+ * <pre>
+ * OrderItemExample example = new OrderItemExample();
+ * example.createCriteria().andOidEqualTo(100);
+ * List<OrderItem> items = orderItemMapper.selectByExample(example);
+ * </pre>
+ */
 public class OrderItemExample {
+    /** ORDER BY clause fragment, e.g., "id asc" */
     protected String orderByClause;
 
+    /** Whether to select distinct rows (eliminates duplicates) */
     protected boolean distinct;
 
+    /** List of OR-ed criteria for building complex WHERE clauses */
     protected List<Criteria> oredCriteria;
 
     public OrderItemExample() {

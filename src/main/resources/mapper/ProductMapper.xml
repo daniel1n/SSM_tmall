@@ -5,11 +5,12 @@
         <id column="id" jdbcType="INTEGER" property="id"/>
         <result column="name" jdbcType="VARCHAR" property="name"/>
         <result column="subTitle" jdbcType="VARCHAR" property="subTitle"/>
-        <result column="originalPrice" jdbcType="REAL" property="originalPrice"/>
-        <result column="promotePrice" jdbcType="REAL" property="promotePrice"/>
+        <result column="originalPrice" jdbcType="DECIMAL" property="originalPrice"/>
+        <result column="promotePrice" jdbcType="DECIMAL" property="promotePrice"/>
         <result column="stock" jdbcType="INTEGER" property="stock"/>
         <result column="cid" jdbcType="INTEGER" property="cid"/>
         <result column="createDate" jdbcType="TIMESTAMP" property="createDate"/>
+        <result column="version" jdbcType="INTEGER" property="version"/>
     </resultMap>
     <sql id="Example_Where_Clause">
         <where>
@@ -42,7 +43,7 @@
         </where>
     </sql>
     <sql id="Base_Column_List">
-    id, name, subTitle, originalPrice, promotePrice, stock, cid, createDate
+    id, name, subTitle, originalPrice, promotePrice, stock, cid, createDate, version
   </sql>
     <select id="selectByExample" parameterType="com.qqlin.tmall.pojo.ProductExample" resultMap="BaseResultMap">
         select
@@ -74,8 +75,8 @@
     insert into product (name, subTitle, originalPrice, 
       promotePrice, stock, cid, 
       createDate)
-    values (#{name,jdbcType=VARCHAR}, #{subTitle,jdbcType=VARCHAR}, #{originalPrice,jdbcType=REAL}, 
-      #{promotePrice,jdbcType=REAL}, #{stock,jdbcType=INTEGER}, #{cid,jdbcType=INTEGER}, 
+    values (#{name,jdbcType=VARCHAR}, #{subTitle,jdbcType=VARCHAR}, #{originalPrice,jdbcType=DECIMAL},
+      #{promotePrice,jdbcType=DECIMAL}, #{stock,jdbcType=INTEGER}, #{cid,jdbcType=INTEGER}, 
       #{createDate,jdbcType=TIMESTAMP})
   </insert>
     <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.qqlin.tmall.pojo.Product"
@@ -112,10 +113,10 @@
                 #{subTitle,jdbcType=VARCHAR},
             </if>
             <if test="originalPrice != null">
-                #{originalPrice,jdbcType=REAL},
+                #{originalPrice,jdbcType=DECIMAL},
             </if>
             <if test="promotePrice != null">
-                #{promotePrice,jdbcType=REAL},
+                #{promotePrice,jdbcType=DECIMAL},
             </if>
             <if test="stock != null">
                 #{stock,jdbcType=INTEGER},
@@ -138,10 +139,10 @@
                 subTitle = #{subTitle,jdbcType=VARCHAR},
             </if>
             <if test="originalPrice != null">
-                originalPrice = #{originalPrice,jdbcType=REAL},
+                originalPrice = #{originalPrice,jdbcType=DECIMAL},
             </if>
             <if test="promotePrice != null">
-                promotePrice = #{promotePrice,jdbcType=REAL},
+                promotePrice = #{promotePrice,jdbcType=DECIMAL},
             </if>
             <if test="stock != null">
                 stock = #{stock,jdbcType=INTEGER},
@@ -159,11 +160,34 @@
     update product
     set name = #{name,jdbcType=VARCHAR},
       subTitle = #{subTitle,jdbcType=VARCHAR},
-      originalPrice = #{originalPrice,jdbcType=REAL},
-      promotePrice = #{promotePrice,jdbcType=REAL},
+      originalPrice = #{originalPrice,jdbcType=DECIMAL},
+      promotePrice = #{promotePrice,jdbcType=DECIMAL},
       stock = #{stock,jdbcType=INTEGER},
       cid = #{cid,jdbcType=INTEGER},
       createDate = #{createDate,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=INTEGER}
   </update>
+
+    <!-- 原子库存扣减：返回影响行数，0表示库存不足 -->
+    <update id="decreaseStock">
+        UPDATE product
+        SET stock = stock - #{number}, version = version + 1
+        WHERE id = #{pid} AND stock >= #{number}
+    </update>
+
+    <!-- 乐观锁更新：仅当版本匹配时更新，防止并发覆盖 -->
+    <update id="updateWithOptimisticLock">
+        UPDATE product
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="subTitle != null">subTitle = #{subTitle},</if>
+            <if test="originalPrice != null">originalPrice = #{originalPrice},</if>
+            <if test="promotePrice != null">promotePrice = #{promotePrice},</if>
+            <if test="stock != null">stock = #{stock},</if>
+            <if test="cid != null">cid = #{cid},</if>
+            <if test="createDate != null">createDate = #{createDate},</if>
+            version = version + 1
+        </set>
+        WHERE id = #{id} AND version = #{version}
+    </update>
 </mapper>

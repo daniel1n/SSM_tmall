@@ -3,11 +3,25 @@ package com.qqlin.tmall.pojo;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * MyBatis Example class for dynamic SQL query construction on User entities.
+ * Used to build WHERE clauses programmatically for flexible querying.
+ *
+ * Usage example:
+ * <pre>
+ * UserExample example = new UserExample();
+ * example.createCriteria().andNameLike("%admin%");
+ * List<User> users = userMapper.selectByExample(example);
+ * </pre>
+ */
 public class UserExample {
+    /** ORDER BY clause fragment, e.g., "id desc" or "name asc" */
     protected String orderByClause;
 
+    /** Whether to select distinct rows (eliminates duplicates) */
     protected boolean distinct;
 
+    /** List of OR-ed criteria for building complex WHERE clauses */
     protected List<Criteria> oredCriteria;
 
     public UserExample() {

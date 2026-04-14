@@ -5,9 +5,8 @@ import com.qqlin.tmall.pojo.OrderItem;
 import com.qqlin.tmall.pojo.User;
 import com.qqlin.tmall.service.CategoryService;
 import com.qqlin.tmall.service.OrderItemService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -15,30 +14,61 @@ import javax.servlet.http.HttpSession;
 import java.util.List;
 
 /**
+ * Navigation data preparation interceptor for enriching the model with common data.
+ *
+ * <p>This interceptor prepares data needed for the navigation bar and other
+ * shared UI elements across all pages. It runs after the controller executes
+ * but before the view is rendered.</p>
+ *
+ * <p>Data prepared by this interceptor includes:</p>
+ * <ul>
+ *   <li>Category list (cs) - For the category dropdown/search in navigation</li>
+ *   <li>Context path (contextPath) - For proper URL construction and logo links</li>
+ *   <li>Cart total item number (cartTotalItemNumber) - Number of items in user's cart</li>
+ * </ul>
+ *
+ * <p>Spring Boot 适配说明:</p>
+ * <ul>
+ *   <li>使用 HandlerInterceptor 替代已废弃的 HandlerInterceptorAdapter</li>
+ *   <li>移除了 @Autowired 依赖注入</li>
+ *   <li>通过构造器接收服务实例</li>
+ *   <li>在 WebMvcConfig 中创建实例并注入依赖</li>
+ * </ul>
+ *
  * @author qqlin
  * @date 2020-5-22
+ * @see HandlerInterceptor
  */
-public class OtherInterceptor extends HandlerInterceptorAdapter {
-    @Autowired
-    CategoryService categoryService;
+public class OtherInterceptor implements HandlerInterceptor {
 
-    @Autowired
-    OrderItemService orderItemService;
+    /** 分类服务 - 用于获取分类列表 */
+    private final CategoryService categoryService;
 
-    public OtherInterceptor() {
-        super();
+    /** 订单项服务 - 用于获取购物车数量 */
+    private final OrderItemService orderItemService;
+
+    /**
+     * 构造器 - 接收服务依赖注入
+     *
+     * @param categoryService  分类服务
+     * @param orderItemService 订单项服务
+     */
+    public OtherInterceptor(CategoryService categoryService, OrderItemService orderItemService) {
+        this.categoryService = categoryService;
+        this.orderItemService = orderItemService;
     }
 
     /**
-     * 在业务处理器处理请求之前被调用
-     * 如果返回false:
-     * --- 从当前的拦截器往回执行所有拦截器的afterCompoletion(),再退出拦截器链
-     * 如果返回true:
-     * --- 执行下一个拦截器，知道所有拦截器都执行完毕
-     * --- 再执行被拦截器的Controller
-     * --- 然后进入拦截器链
-     * --- 从最后一个拦截器往回执行所有的postHandle()
-     * --- 接着再从最后一个拦截器往回执行所有的afterCompletion()
+     * Called before the handler is executed.
+     *
+     * <p>This implementation always returns {@code true} to allow the request
+     * to proceed. The authentication check is handled by LoginInterceptor.</p>
+     *
+     * @param request  the HTTP request
+     * @param response the HTTP response
+     * @param handler  the handler being intercepted
+     * @return always {@code true}
+     * @throws Exception if an error occurs
      */
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -46,30 +76,34 @@ public class OtherInterceptor extends HandlerInterceptorAdapter {
     }
 
     /**
-     * 在业务处理器处理请求执行完成后，生成视图之前执行的动作
-     * 可以在modelAndView中加入数据，比如当前时间
+     * Called after the handler executes but before the view is rendered.
+     *
+     * <p>This method populates the session with data required for navigation:</p>
+     * <ul>
+     *   <li>Category list ("cs") - For display in the search bar dropdown</li>
+     *   <li>Context path ("contextPath") - For proper URL construction and logo links</li>
+     *   <li>Cart total item number ("cartTotalItemNumber") - Total items in user's shopping cart</li>
+     * </ul>
+     *
+     * @param request     the HTTP request
+     * @param response    the HTTP response
+     * @param handler     the handler that was executed
+     * @param modelAndView the ModelAndView object (not used in this implementation)
+     * @throws Exception if an error occurs while preparing navigation data
      */
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
-        super.postHandle(request, response, handler, modelAndView);
-
-        /**
-         * 这里是获取分类集合信息，用于放在搜索栏下面
-         */
+        // Retrieves the category list and stores it in session for the search bar dropdown
         List<Category> categories = categoryService.list();
         request.getSession().setAttribute("cs", categories);
 
-        /**
-         * 这里是获取当前的contextPath：tmall_ssm,用于放在左上角那个变形金刚，
-         * 点击后才能跳转到首页，否则点击之后，也仅仅停留在当前页面
-         */
+        // Retrieves the context path (e.g., "tmall_ssm") for proper URL construction.
+        // This ensures the logo link redirects to the home page correctly.
         HttpSession session = request.getSession();
         String contextPath = session.getServletContext().getContextPath();
         request.getSession().setAttribute("contextPath", contextPath);
 
-        /**
-         * 这里是获取购物车中一共有多少数量
-         */
+        // Calculates the total number of items in the user's shopping cart
         User user = (User) session.getAttribute("user");
         int cartTotalItemNumber = 0;
         if (null != user) {
@@ -79,20 +113,5 @@ public class OtherInterceptor extends HandlerInterceptorAdapter {
             }
         }
         request.getSession().setAttribute("cartTotalItemNumber", cartTotalItemNumber);
-    }
-
-    /**
-     * 在DispatcherServlet完全处理完请求后被调用,可用于清理资源等
-     * <p>
-     * 当有拦截器抛出异常时,会从当前拦截器往回执行所有的拦截器的afterCompletion()
-     */
-    @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        super.afterCompletion(request, response, handler, ex);
-    }
-
-    @Override
-    public void afterConcurrentHandlingStarted(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        super.afterConcurrentHandlingStarted(request, response, handler);
     }
 }

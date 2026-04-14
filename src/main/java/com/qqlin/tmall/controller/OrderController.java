@@ -15,8 +15,10 @@ import java.util.Date;
 import java.util.List;
 
 /**
+ * Controller handling admin order management.
+ * All endpoints are prefixed with /admin_order for admin backend management.
+ *
  * @author qqlin
- * @date 2020-5-21
  */
 @Controller
 @RequestMapping("")
@@ -32,6 +34,22 @@ public class OrderController {
         this.orderItemService = orderItemService;
     }
 
+    /**
+     * Display paginated list of all orders.
+     *
+     * URL: /admin_order_list
+     * Method: GET
+     * Parameters:
+     *   - Page page: Pagination parameters (start, count) (required)
+     * Returns: "admin/listOrder" (admin/listOrder.jsp)
+     *
+     * Business Logic:
+     * 1. Use PageHelper for pagination
+     * 2. Fetch all orders from database
+     * 3. Calculate total count for pagination
+     * 4. Fill order items for each order
+     * 5. Return model with orders and page info
+     */
     @RequestMapping("admin_order_list")
     public String list(Model model, Page page) {
         PageHelper.offsetPage(page.getStart(), page.getCount());
@@ -48,6 +66,21 @@ public class OrderController {
         return "admin/listOrder";
     }
 
+    /**
+     * Process order delivery (mark order as shipped).
+     *
+     * URL: /admin_order_delivery
+     * Method: POST
+     * Parameters:
+     *   - Order order: Order object with id (required)
+     * Returns: Redirect to "admin_order_list"
+     *
+     * Business Logic:
+     * 1. Set delivery date to current date
+     * 2. Update order status to WAIT_CONFIRM (waiting for buyer confirmation)
+     * 3. Update order in database
+     * 4. Redirect to order list
+     */
     @RequestMapping("admin_order_delivery")
     public String delivery(Order order) throws IOException {
         order.setDeliveryDate(new Date());

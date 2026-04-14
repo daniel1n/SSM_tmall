@@ -4,11 +4,26 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * MyBatis Example class for dynamic SQL query construction on Product entities.
+ * Used to build WHERE clauses programmatically for flexible querying.
+ *
+ * Usage example:
+ * <pre>
+ * ProductExample example = new ProductExample();
+ * example.createCriteria().andCidEqualTo(1).andPromotePriceGreaterThan(100.0f);
+ * example.setOrderByClause("createDate desc");
+ * List<Product> products = productMapper.selectByExample(example);
+ * </pre>
+ */
 public class ProductExample {
+    /** ORDER BY clause fragment, e.g., "id desc" or "name asc" */
     protected String orderByClause;
 
+    /** Whether to select distinct rows (eliminates duplicates) */
     protected boolean distinct;
 
+    /** List of OR-ed criteria for building complex WHERE clauses */
     protected List<Criteria> oredCriteria;
 
     public ProductExample() {

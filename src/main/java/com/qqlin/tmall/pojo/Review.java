@@ -2,19 +2,29 @@ package com.qqlin.tmall.pojo;
 
 import java.util.Date;
 
+/**
+ * Review entity representing a customer's product review/feedback.
+ * Reviews are posted after purchase and contain the user's opinion about the product.
+ * Reviews help other customers make purchasing decisions.
+ */
 public class Review {
+    /** Unique identifier for the review */
     private Integer id;
 
+    /** Review text content/comment */
     private String content;
 
+    /** Foreign key to the user who wrote the review */
     private Integer uid;
 
+    /** Foreign key to the product being reviewed */
     private Integer pid;
 
+    /** Date when the review was posted */
     private Date createDate;
 
     /**
-     * 非数据库字段
+     * Non-database field: Associated User object for display purposes
      */
     private User user;
 
