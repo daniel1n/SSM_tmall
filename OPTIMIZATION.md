@@ -529,12 +529,92 @@ mvn clean compile
 
 ---
 
+## 9. 缓存优化 - Redis + Spring Cache
+
+### 9.1 概述
+
+引入 Redis 作为缓存实现，使用 Spring Cache 简化缓存逻辑，提升热点数据的访问性能。
+
+### 9.2 配置
+
+**1. pom.xml 添加依赖**
+
+```xml
+<!-- Spring Boot Cache (缓存支持) -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-cache</artifactId>
+</dependency>
+
+<!-- Redis (缓存实现) -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-redis</artifactId>
+</dependency>
+```
+
+**2. application.yml Redis 配置**
+
+```yaml
+spring:
+  redis:
+    host: localhost
+    port: 6379
+    password:
+    database: 0
+    timeout: 3000
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        max-wait: -1
+```
+
+**3. RedisCacheConfig.java 启用缓存**
+
+```java
+@Configuration
+@EnableCaching
+public class RedisCacheConfig {
+}
+```
+
+### 9.3 缓存策略
+
+| 缓存名称 | 服务类 | 缓存方法 | 缓存键 | 说明 |
+|---------|--------|---------|-------|------|
+| categories | CategoryServiceImpl | list() | "all" | 全部分类列表 |
+| categories | CategoryServiceImpl | get(int id) | #id | 单个分类 |
+| products | ProductServiceImpl | get(int id) | #id | 商品详情 |
+| products | ProductServiceImpl | list(int cid) | "cid_" + cid | 按分类商品列表 |
+| products | ProductServiceImpl | listByIds(List<Integer> ids) | #ids.hashCode() | 批量商品查询 |
+
+### 9.4 缓存注解说明
+
+**@Cacheable** - 缓存查询结果
+```java
+@Cacheable(value = "categories", key = "'all'")
+public List<Category> list() { ... }
+```
+
+**@CacheEvict** - 数据变更时清除缓存
+```java
+@CacheEvict(value = "categories", allEntries = true)
+public void add(Category category) { ... }
+```
+
+### 9.5 效果
+
+- **分类数据缓存**: 导航栏分类列表、首页分类数据等热点数据直接从 Redis 获取
+- **商品数据缓存**: 商品详情页、分类商品列表等高频访问页面响应更快
+- **自动缓存失效**: 数据变更（增删改）时自动清除对应缓存
+- **内存数据库**: Redis 基于内存，读取速度极快
+
+---
+
 ## 后续优化建议
 
 1. **数据库层面**
    - 为常用查询添加索引 (如 `order_item.pid`, `order_item.uid`)
    - 使用数据库级别的 SUM() 替代应用层循环
-
-2. **缓存优化**
-   - 引入 Redis 缓存热门商品和分类数据
-   - 使用 Spring Cache 简化缓存逻辑

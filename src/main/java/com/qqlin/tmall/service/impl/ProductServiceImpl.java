@@ -6,6 +6,8 @@ import com.qqlin.tmall.pojo.Product;
 import com.qqlin.tmall.pojo.ProductExample;
 import com.qqlin.tmall.pojo.ProductImage;
 import com.qqlin.tmall.service.*;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -42,21 +44,25 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @CacheEvict(value = "products", allEntries = true)
     public void add(Product product) {
         productMapper.insert(product);
     }
 
     @Override
+    @CacheEvict(value = "products", allEntries = true)
     public void delete(int id) {
         productMapper.deleteByPrimaryKey(id);
     }
 
     @Override
+    @CacheEvict(value = "products", allEntries = true)
     public void update(Product product) {
         productMapper.updateByPrimaryKeySelective(product);
     }
 
     @Override
+    @Cacheable(value = "products", key = "#id")
     public Product get(int id) {
         Product product = productMapper.selectByPrimaryKey(id);
         setFirstProductImage(product);
@@ -77,6 +83,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Cacheable(value = "products", key = "'cid_' + #cid")
     public List list(int cid) {
         ProductExample example = new ProductExample();
         example.createCriteria().andCidEqualTo(cid);
@@ -159,6 +166,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Cacheable(value = "products", key = "'ids_' + #ids.hashCode()")
     public List<Product> listByIds(List<Integer> ids) {
         if (ids == null || ids.isEmpty()) {
             return new java.util.ArrayList<>();
@@ -172,6 +180,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @CacheEvict(value = "products", allEntries = true)
     public boolean decreaseStock(int pid, int number) {
         int rows = productMapper.decreaseStock(pid, number);
         return rows > 0;
